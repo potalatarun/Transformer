@@ -1,3 +1,4 @@
+%%writefile "/kaggle/working/Transformer/model.py"
 import torch
 import torch.nn as nn
 import math
@@ -96,7 +97,7 @@ class MultiHeadAttention(nn.Module):
         # (batch, h, seq_len, d_k) 
         attention_scores = (query @ key.transpose(-2, -1)) / math.sqrt(d_k) 
         if mask is not None:
-            attention_scores.masked_fill_(mask == 0, -1e9)
+            attention_scores.masked_fill_(mask == 0, -1e4)
 
         attention_scores = attention_scores.softmax(dim = -1) # (Batch, h, seq_len, seq_len) 
         if dropout is not None:
@@ -117,8 +118,8 @@ class MultiHeadAttention(nn.Module):
         seq_len_size = query.shape[1]
 
         query = query.view(batch_size, seq_len_size, self.h, self.d_k).transpose(1, 2)
-        key   = key.view(key.shape[0], key.shape[1], self.h, self.d_k).transpose(1,2)
-        value = value.view(value.shape[0], value.shape[1], self.h, self.d_k).transpose(1,2)
+        key   = key.view(batch_size, seq_len_size, self.h, self.d_k).transpose(1,2)
+        value = value.view(batch_size, seq_len_size, self.h, self.d_k).transpose(1,2)
 
         x, self.attention_scores = MultiHeadAttention.attention(query, key, value, mask, self.dropout) 
 
